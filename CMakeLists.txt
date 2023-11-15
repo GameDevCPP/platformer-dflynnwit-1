@@ -4,7 +4,7 @@ project(CMakeSFMLProject LANGUAGES CXX)
 include(FetchContent)
 FetchContent_Declare(SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 2.5.x)
+    GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(SFML)
 
 set(SFML_INCS "lib/sfml/include")
@@ -44,9 +44,9 @@ target_include_directories(lib_ecm INTERFACE "${CMAKE_SOURCE_DIR}/lib_ecm" )
 target_link_libraries(lib_ecm PRIVATE lib_maths)
 
 
-
+file(GLOB_RECURSE Platformer "src/*.*")
 add_executable(CMakeSFMLProject src/main.cpp  src/platformer.cpp)
-target_link_libraries(CMakeSFMLProject PRIVATE sfml-graphics lib_engine)
+target_link_libraries(CMakeSFMLProject PRIVATE sfml-graphics lib_engine lib_maths)
 target_compile_features(CMakeSFMLProject PRIVATE cxx_std_17)
 if (WIN32 AND BUILD_SHARED_LIBS)
     add_custom_command(TARGET CMakeSFMLProject POST_BUILD

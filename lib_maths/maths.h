@@ -6,6 +6,7 @@
 #include <iostream> // std::cout, std::fixed
 #include <sstream>
 #include <vector>
+#include <stdint.h>
 
 namespace sf {
 
