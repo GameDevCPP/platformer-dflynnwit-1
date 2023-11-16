@@ -7,8 +7,6 @@ FetchContent_Declare(SFML
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(SFML)
 
-FetchContent_Declare(Box2D
-    GIT_REPOSITORY http://)
 set(SFML_INCS "lib/sfml/include")
 
 # B2D - Box2D physics library
