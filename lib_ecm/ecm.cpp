@@ -6,7 +6,12 @@ Entity::Entity(Scene* const s)
     : _position({0, 0}), _rotation(0), _alive(true), _visible(true),
       scene(s), _fordeletion(false) {}
 
-void Entity::addTag(const std::string& t) { _tags.insert(t); }
+void Entity::addTag(const std::string& t) {
+    //ensure that the tag is not already in the set or that nullptr is not passed
+    if(t != "" && _tags.find(t) == _tags.end())
+        _tags.insert(t);
+    //_tags.insert(t);
+}
 const std::set<std::string>& Entity::getTags() const { return _tags; }
 
 void Entity::update(double dt) {

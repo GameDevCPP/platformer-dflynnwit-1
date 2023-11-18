@@ -81,7 +81,7 @@ void Engine::Render(RenderWindow& window) {
 
 void Engine::Start(unsigned int width, unsigned int height,
                    const std::string& gameName, Scene* scn) {
-  RenderWindow window(VideoMode(sf::Vector2u(width, height)), gameName);
+  RenderWindow window(VideoMode(width, height), gameName);
   _gameName = gameName;
   _window = &window;
   Renderer::initialise(window);
@@ -132,8 +132,8 @@ void Engine::ChangeScene(Scene* s) {
   if (!s->isLoaded()) {
     cout << "Eng: Entering Loading Screen\n";
     loadingTime =0;
-    _activeScene->LoadAsync();
-    //_activeScene->Load();
+    //_activeScene->LoadAsync();
+    _activeScene->Load();
     loading = true;
   }
 }

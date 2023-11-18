@@ -96,8 +96,10 @@ public:
     static_assert(std::is_base_of<Component, T>::value, "T != component");
     std::vector<std::shared_ptr<T>> ret;
     for (const auto c : _components) {
-      if (typeid(*c) == typeid(T)) {
-        ret.push_back(std::dynamic_pointer_cast<T>(c));
+      //if (typeid(*c) == typeid(T)) { // on this line I'm getting a warning:  warning: expression with side effects will be evaluated despite being used as an operand to 'typeid' [-Wpotentially-evaluated-expression]. What is this warning about? A: This is a warning about the fact that you are using a variable in a way that has side effects, and then using the result of that in a way that does not have side effects. The compiler is warning you that it will evaluate the expression with side effects, even though the result is not used. This is a warning because it is often a mistake. For example, if you have a function that returns a pointer, and you want to check whether the pointer is null, you might write if (typeid(f()) == typeid(void*)) { ... }. This will call f() even if the pointer is null, which is probably not what you want. The correct way to write this is if (auto p = f(); typeid(p) == typeid(void*)) { ... }.
+        //what is a better way of writing the previous line if (typeid(*c) == typeid(T))? A: You can use dynamic_cast instead of typeid. dynamic_cast will return nullptr if the cast fails, so you can write if (dynamic_cast<T*>(c)) { ... }.
+          if (dynamic_cast<T*>(c)) { // this is the line I changed
+          ret.push_back(std::dynamic_pointer_cast<T>(c));
       }
     }
     return std::move(ret);
