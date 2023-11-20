@@ -9,7 +9,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(Games_Engineering)
+project(PRACTICAL_7_PLATFORMER)
 include(FetchContent)
 
 
@@ -27,11 +27,12 @@ if(NOT sfml_POPULATED)
 endif()
 get_cmake_property(_variableNames VARIABLES)
 list(FILTER _variableNames INCLUDE REGEX "sfml")
-message("variableNames: ${_variableNames}") # how do I filter out the variables I want? A: use the following line: list(FILTER _variableNames INCLUDE REGEX "sfml")
-# Q: how do I go through this list and print all the names and values? A: use the following line: foreach (_variableName ${_variableNames}) message(STATUS "${_variableName}=${${_variableName}}") endforeach()
+message("variableNames: ${_variableNames}")
+
 foreach (_variableName ${_variableNames})
     message(STATUS "${_variableName}=${${_variableName}}")
 endforeach()
+
 message ("SFML_SOURCE_DIR: ${sfml_SOURCE_DIR}")
 
 message ("SFML_SOURCE_DIR: ${sfml_SOURCE_DIR}")
@@ -39,10 +40,12 @@ message ("SFML_SOURCE_DIR: ${sfml_SOURCE_DIR}")
 message("SFML_BINARY_DIR: ${sfml_BINARY_DIR}")
 
 
+# The following downloads box2d into the build directory and builds it
 FetchContent_Declare(box2d
         GIT_REPOSITORY     https://github.com/dooglz/Box2D.git
         GIT_TAG             v2.3.1)
 
+# We need finer control over the build of box2d so we set the following variables
 set(BOX2D_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 if(NOT box2d_POPULATED)
     FetchContent_Populate(box2d)
@@ -51,8 +54,8 @@ endif()
 
 get_cmake_property(_variableNamesbox VARIABLES)
 list(FILTER _variableNamesbox INCLUDE REGEX "box")
-message("_variableNamesbox: ${_variableNamesbox}") # how do I filter out the variables I want? A: use the following line: list(FILTER _variableNames INCLUDE REGEX "sfml")
-# Q: how do I go through this list and print all the names and values? A: use the following line: foreach (_variableName ${_variableNames}) message(STATUS "${_variableName}=${${_variableName}}") endforeach()
+message("_variableNamesbox: ${_variableNamesbox}")
+
 foreach (_variableName ${_variableNamesbox})
     message(STATUS "${_variableName}=${${_variableName}}")
 endforeach()
@@ -69,6 +72,8 @@ add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/res
 )
 
+# _________________________________________________________________________________________________________
+# -- The alternative was to use submodule (for both sfml and box2d - below) from github and use that to download and populate the directory - We went with the more "straightforward" approach of using fetchcontent
 #### Add External Dependencies ####
 # SFML - graphics library
 #add_subdirectory("lib/sfml" EXCLUDE_FROM_ALL)
@@ -81,14 +86,18 @@ add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
 #include_directories("lib/b2d/Box2D/")
 #set(B2D_INCS "lib/b2d/Box2D/")
 #link_directories("${CMAKE_BINARY_DIR}/lib/sfml/lib")
+# _________________________________________________________________________________________________________
 
+# The following allows us to tell the compiler where the header files are for box2D. This is normally managed by fetchcontent but we need to do it manually for box2d - one of the problems in the build
 set (B2D_INCS "${box2d_SOURCE_DIR}/Box2D") # note that fetchcontent will download the box2d source code into the box2d_SOURCE_DIR
 
 #### Add Engine and our own library projects####
 
 set (SFML_INCS "${sfml_SOURCE_DIR}/include") # note that fetchcontent will download the sfml source code into the sfml_SOURCE_DIR
 
-set (lib_box2d "${box2d_BINARY_DIR}/Box2D/libBox2D.a") # note that fetchcontent will download the box2d source code into the box2d_SOURCE_DIR
+set (lib_box2d "${box2d_BINARY_DIR}/Box2D/libBox2D.a") # Again, not ideal, but we need to tell the compiler where the box2d library is. This is normally managed by fetchcontent but we need to do it manually for box2d - one of the problems in the build
+
+
 file(GLOB_RECURSE RESOURCE_FILES "res/*.*")
 ####
 file(GLOB_RECURSE SOURCE_FILES engine/*.cpp engine/*.h)
@@ -124,11 +133,19 @@ file(GLOB_RECURSE SCENES lab_7_platformer/scenes/*.cpp practical_6_platformer/sc
 add_executable(PRACTICAL_7_PLATFORMER ${SOURCES} ${RESOURCE_FILES})
 source_group("components" FILES ${CMPNTS})
 source_group("resources" FILES ${RESOURCE_FILES})
-#target_include_directories(PRACTICAL_6_PLATFORMER SYSTEM PRIVATE ${SFML_INCS} ${B2D_INCS})
+
+
 target_link_libraries(PRACTICAL_7_PLATFORMER lib_engine)
 set(EXECUTABLES ${EXECUTABLES} PRACTICAL_7_PLATFORMER)
 
+
+if (WIN32 AND BUILD_SHARED_LIBS)
+    add_custom_command(TARGET PRACTICAL_7_PLATFORMER POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:PRACTICAL_7_PLATFORMER> $<TARGET_FILE_DIR:PRACTICAL_7_PLATFORMER> COMMAND_EXPAND_LISTS)
+endif()
+
 add_dependencies(PRACTICAL_7_PLATFORMER copy_resources)
+
 
 set_target_properties(PRACTICAL_7_PLATFORMER
         PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
